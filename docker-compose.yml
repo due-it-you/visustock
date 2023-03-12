@@ -2,13 +2,63 @@ version: "3.9"
 services:
   app:
     build: ./infra/php
+    restart: always
     volumes:
       - ./src:/data
+    environment:
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - APP_ENV=${APP_ENV:-local}
+      - APP_URL=${APP_URL:-http://localhost}
+      - LOG_CHANNEL=${LOG_CHANNEL:-stderr}
+      - LOG_STDERR_FORMATTER=${LOG_STDERR_FORMATTER:-Monolog\Formatter\JsonFormatter}
+      - DB_CONNECTION=${DB_CONNECTION:-pgsql}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_DATABASE=${DB_DATABASE:-postgres}
+      - DB_USERNAME=${DB_USERNAME:-monjosan21}
+      - DB_PASSWORD=${DB_PASSWORD:-H140117hH140117h}
+    networks:
+    - my_network
   web: 
-    image: nginx:1.20-alpine
+    image: ubuntu/nginx
     ports:
       - 8080:80
     volumes:
       - ./src:/data
       - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf
     working_dir: /data
+    networks:
+      - my_network
+  db:
+    image: postgres:14
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-H140117hH140117h}
+      - POSTGRES_USER=${DB_USERNAME:-monjosan21}
+      - DB_CONNECTION=${DB_CONNECTION:-pgsql}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_DATABASE=${DB_DATABASE:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - 8001:80/tcp
+    environment:
+      PGADMIN_DEFAULT_EMAIL: yutoto0117@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: H140117hH140117h
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    tty: true
+    networks:
+      - my_network
+volumes:
+  postgres_data:
+  pgadmin_data:
+networks:
+  my_network:
