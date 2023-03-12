@@ -8,7 +8,11 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
   COMPOSER_HOME=/composer
 
 # composerインストール
-COPY --from=composer:1.10 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.0 /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_HOME /composer
+RUN composer config -g repos.packagist composer https://packagist.jp
+RUN composer self-update 
 
 # Laravelの実行に必要なライブラリのインストール
 RUN apt-get update && \
